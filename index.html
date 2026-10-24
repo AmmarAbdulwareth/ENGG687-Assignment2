@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Engineer's Dilemma</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  font-family: Georgia, 'Times New Roman', serif;
+  background: #f5f0eb; color: #2b2b2b;
+  min-height: 100vh;
+}
+.container {
+  max-width: 640px; margin: 0 auto; padding: 40px 24px;
+}
+
+/* TITLE */
+.title-screen h1 {
+  font-size: 32px; font-weight: 700; margin-bottom: 4px; color: #1a1a1a;
+}
+.title-screen .sub {
+  font-size: 14px; color: #888; margin-bottom: 32px;
+  font-family: Helvetica, Arial, sans-serif; font-style: italic;
+}
+.info-line {
+  font-size: 13px; color: #666; line-height: 1.8;
+  margin-bottom: 28px; font-family: Helvetica, Arial, sans-serif;
+}
+
+.author-note {
+  margin-bottom: 32px; padding: 20px 0;
+  border-top: 1px solid #d5cec5; border-bottom: 1px solid #d5cec5;
+}
+.author-note h3 {
+  font-size: 16px; margin-bottom: 12px; color: #1a1a1a;
+}
+.author-note p {
+  font-size: 14px; line-height: 1.85; color: #444; margin-bottom: 10px;
+}
+
+.topics-list {
+  margin-bottom: 28px; font-family: Helvetica, Arial, sans-serif;
+}
+.topics-list h4 { font-size: 13px; color: #888; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 1px; }
+.topics-list ul { list-style: none; padding: 0; }
+.topics-list li {
+  font-size: 13px; color: #555; padding: 6px 0;
+  border-bottom: 1px dotted #ddd;
+}
+.topics-list li:last-child { border-bottom: none; }
+.topics-list li strong { color: #1a1a1a; }
+
+.how-play {
+  font-size: 13px; color: #777; margin-bottom: 28px;
+  font-family: Helvetica, Arial, sans-serif; line-height: 1.6;
+}
+
+.start-btn {
+  background: #2b2b2b; color: #f5f0eb; border: none;
+  padding: 12px 32px; font-size: 15px; cursor: pointer;
+  font-family: Helvetica, Arial, sans-serif; font-weight: 500;
+  transition: background 0.2s;
+}
+.start-btn:hover { background: #444; }
+
+/* SCENARIOS */
+.scenario { display: none; }
+.scenario.active { display: block; animation: fadeIn 0.4s; }
+
+.progress {
+  font-family: Helvetica, Arial, sans-serif;
+  font-size: 12px; color: #999; margin-bottom: 24px;
+  display: flex; align-items: center; gap: 12px;
+}
+.progress-bar { flex: 1; height: 2px; background: #ddd; border-radius: 1px; }
+.progress-fill { height: 100%; background: #2b2b2b; border-radius: 1px; transition: width 0.4s; }
+
+.sc-label {
+  font-family: Helvetica, Arial, sans-serif;
+  font-size: 11px; color: #999; text-transform: uppercase;
+  letter-spacing: 1.5px; margin-bottom: 8px;
+}
+.scenario h2 { font-size: 24px; color: #1a1a1a; margin-bottom: 20px; }
+.narrative {
+  background: #eee8e0; padding: 20px; margin-bottom: 24px;
+  border-left: 3px solid #c4b8a8;
+}
+.narrative p { font-size: 14px; line-height: 1.85; color: #444; }
+.question {
+  font-size: 16px; color: #1a1a1a; margin-bottom: 16px; font-weight: 700;
+}
+
+.choices { display: flex; flex-direction: column; gap: 8px; }
+.choice-btn {
+  background: #fff; border: 1px solid #d5cec5; padding: 14px 16px;
+  text-align: left; cursor: pointer; font-size: 14px; line-height: 1.65;
+  color: #333; font-family: Georgia, serif; transition: all 0.15s;
+}
+.choice-btn:hover { border-color: #999; background: #faf8f5; }
+.choice-btn .letter {
+  font-family: Helvetica, Arial, sans-serif; font-weight: 700;
+  color: #999; margin-right: 10px; font-size: 13px;
+}
+.choice-btn.picked-good { border-color: #5a8a5a; background: #f0f5f0; }
+.choice-btn.picked-good .letter { color: #5a8a5a; }
+.choice-btn.picked-ok { border-color: #b8963a; background: #faf5eb; }
+.choice-btn.picked-ok .letter { color: #b8963a; }
+.choice-btn.picked-bad { border-color: #a05050; background: #f5f0f0; }
+.choice-btn.picked-bad .letter { color: #a05050; }
+
+.outcome { display: none; margin-top: 20px; }
+.outcome.show { display: block; animation: fadeIn 0.3s; }
+.feedback-box {
+  padding: 18px; margin-bottom: 14px; border-left: 3px solid #ccc;
+  background: #fff;
+}
+.feedback-box.fb-good { border-left-color: #5a8a5a; }
+.feedback-box.fb-ok { border-left-color: #b8963a; }
+.feedback-box.fb-bad { border-left-color: #a05050; }
+.feedback-box h4 {
+  font-size: 14px; margin-bottom: 8px;
+  font-family: Helvetica, Arial, sans-serif;
+}
+.fb-good h4 { color: #5a8a5a; }
+.fb-ok h4 { color: #b8963a; }
+.fb-bad h4 { color: #a05050; }
+.feedback-box p { font-size: 13px; line-height: 1.75; color: #555; }
+.feedback-box .conn {
+  font-size: 11px; color: #999; margin-top: 10px;
+  font-family: Helvetica, Arial, sans-serif; font-style: italic;
+}
+
+.next-btn {
+  background: none; color: #2b2b2b; border: 1px solid #2b2b2b;
+  padding: 10px 24px; font-size: 13px; cursor: pointer;
+  font-family: Helvetica, Arial, sans-serif; margin-top: 8px;
+  transition: all 0.15s;
+}
+.next-btn:hover { background: #2b2b2b; color: #f5f0eb; }
+
+/* SCORE */
+.score-screen { display: none; }
+.score-screen.show { display: block; animation: fadeIn 0.5s; }
+.score-screen h2 { font-size: 26px; color: #1a1a1a; margin-bottom: 24px; }
+.score-num {
+  font-family: Helvetica, Arial, sans-serif;
+  font-size: 48px; font-weight: 700; margin-bottom: 4px;
+}
+.score-high { color: #5a8a5a; }
+.score-mid { color: #b8963a; }
+.score-low { color: #a05050; }
+.score-title {
+  font-size: 18px; margin-bottom: 8px;
+  font-family: Helvetica, Arial, sans-serif; font-weight: 600;
+}
+.score-desc { font-size: 14px; color: #666; margin-bottom: 24px; line-height: 1.6; }
+
+.score-grid {
+  display: flex; gap: 12px; margin-bottom: 32px;
+  font-family: Helvetica, Arial, sans-serif;
+}
+.sg-box {
+  flex: 1; text-align: center; padding: 12px 8px;
+  border: 1px solid #d5cec5; background: #fff;
+}
+.sg-box .pts { font-size: 20px; font-weight: 700; display: block; }
+.sg-box .lab { font-size: 10px; color: #999; text-transform: uppercase; letter-spacing: 0.5px; }
+
+.reflection {
+  padding: 24px 0; margin: 24px 0;
+  border-top: 1px solid #d5cec5; border-bottom: 1px solid #d5cec5;
+}
+.reflection h3 { font-size: 18px; color: #1a1a1a; margin-bottom: 14px; }
+.reflection p { font-size: 14px; line-height: 1.85; color: #444; margin-bottom: 12px; }
+
+.ref-section { margin-top: 28px; }
+.ref-section h4 {
+  font-family: Helvetica, Arial, sans-serif;
+  font-size: 11px; color: #999; text-transform: uppercase;
+  letter-spacing: 1.5px; margin-bottom: 10px;
+}
+.ref-section ol {
+  font-size: 12px; color: #777; padding-left: 20px;
+  font-family: Helvetica, Arial, sans-serif; line-height: 1.7;
+}
+.ref-section li { margin-bottom: 4px; }
+
+.footer {
+  font-family: Helvetica, Arial, sans-serif;
+  font-size: 11px; color: #bbb; margin-top: 24px;
+  padding-top: 16px; border-top: 1px solid #e5ddd5;
+}
+
+.restart-btn {
+  background: none; border: 1px solid #ccc; color: #999;
+  padding: 8px 20px; font-size: 12px; cursor: pointer;
+  font-family: Helvetica, Arial, sans-serif; margin-top: 16px;
+  transition: all 0.15s;
+}
+.restart-btn:hover { border-color: #999; color: #555; }
+
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+@media (max-width: 500px) {
+  .container { padding: 24px 16px; }
+  .title-screen h1 { font-size: 26px; }
+  .score-grid { flex-wrap: wrap; }
+  .sg-box { min-width: 45%; }
+}
+
+@media print {
+  body { background: #fff; }
+  .narrative { background: #f5f5f5; }
+  .feedback-box { background: #fafafa; }
+  .choice-btn { page-break-inside: avoid; }
+}
+</style>
+</head>
+<body>
+<div class="container" id="app">
+
+  <div class="title-screen" id="titleScreen">
+    <h1>The Engineer's Dilemma</h1>
+    <div class="sub">An Interactive Ethical Analysis</div>
+    <div class="info-line">
+      Ammar AbdulWareth<br>
+      MEng Chemical Engineering, University of Calgary<br>
+      ENGG 687 &mdash; Fall 2026
+    </div>
+
+    <div class="author-note">
+      <h3>Why I Made This as a Game</h3>
+      <p>The assignment said we could use any creative medium, and since I know how to code I decided to build an interactive game. I think ethics is one of those things where making the decision yourself teaches you more than reading about it. It is easy to say you would do the right thing in a hypothetical. It gets harder when there is a deadline, a supervisor telling you to let it slide, or operators who already found a workaround.</p>
+      <p>You play as a chemical engineer starting out in Alberta's energy sector, which is the career I am working toward. Each of the seven scenarios is an ethical dilemma drawn from our course lectures. You pick how to respond, the game explains why it matters, and you get a score at the end. I wrote every scenario from the perspective of someone who is going to face these situations for real.</p>
+    </div>
+
+    <div class="topics-list">
+      <h4>Topics Covered</h4>
+      <ul>
+        <li><strong>Scenario 1</strong> &mdash; Design Justice &amp; Objectivity (Lecture 3.1)</li>
+        <li><strong>Scenario 2</strong> &mdash; Neoliberalism &amp; Politics (Lecture 3.2)</li>
+        <li><strong>Scenario 3</strong> &mdash; Design for Safety &amp; Misuse (Lecture 3.3)</li>
+        <li><strong>Scenario 4</strong> &mdash; Tort Law &amp; Negligence (Lectures 1.5/1.6)</li>
+        <li><strong>Scenario 5</strong> &mdash; Algorithmic Bias &amp; Data Objectivity (Lecture 3.1)</li>
+        <li><strong>Scenario 6</strong> &mdash; Alarm Fatigue &amp; Design Ethics (Lecture 3.3)</li>
+        <li><strong>Scenario 7</strong> &mdash; Employment Law &amp; Professional Duty (Lecture 1.6)</li>
+      </ul>
+    </div>
+
+    <div class="how-play">
+      <strong>How to play:</strong> Read each scenario. Pick the response that feels right. The game explains the ethical implications and scores you at the end. No trick questions, but some answers are stronger than others.
+    </div>
+
+    <button class="start-btn" onclick="go()">Start</button>
+  </div>
+
+  <div id="area"></div>
+
+  <div class="score-screen" id="scoreScreen">
+    <h2>Your Outcome</h2>
+    <div class="score-num" id="sNum"></div>
+    <div class="score-title" id="sTitle"></div>
+    <div class="score-desc" id="sDesc"></div>
+    <div class="score-grid" id="sGrid"></div>
+
+    <div class="reflection">
+      <h3>My Reflection</h3>
+      <p>When I enrolled in ENGG 687, I expected a course about the APEGA code and not cutting corners. Important, but straightforward. I was wrong. This course has changed the way I think about what being a professional engineer actually means.</p>
+      <p>The design justice lectures challenged me the most. I had not thought much about who gets a seat at the table when engineering decisions are made. In chemical engineering, our projects are refineries, pipelines, processing plants. They get built in specific places and affect specific communities. Costanza-Chock's framework [1] made me confront the fact that the communities most affected by industrial infrastructure are usually the ones with the least say. Environmental racism is a documented pattern, and as someone who wants to work in process engineering in Alberta, I will be making decisions that determine which communities bear those risks. I cannot unsee that now.</p>
+      <p>The neoliberalism material was uncomfortable in a different way. Randy Herrmann's line about engineers being "the foot soldiers of capitalism" stuck with me [3]. We build the systems. When market logic says cut the maintenance budget, the engineer has to decide whether to push back or go along. The pedestrian data drove it home: fatalities up 45% over a decade while cars got safer for drivers [4]. The costs of "efficiency" get pushed onto people with no power to fight back.</p>
+      <p>The safety lectures connect directly to my field. The Swiss cheese model [7] is something I want to carry for the rest of my career. Every removed layer of protection brings you closer to the day when everything lines up wrong. The IKEA Malm case [6] reminded me that "works as intended" is not enough. You have to design for how people actually behave. In chemical engineering, operators bypass interlocks and maintenance gets deferred. These are known behaviors. Designing systems that fail safely despite them is the job.</p>
+      <p>The algorithmic bias scenario was personal because I will almost certainly work with predictive tools in pipeline integrity. The objectivity lecture showed how facial recognition systems performed worse on underrepresented faces because of biased training data [1]. The same principle applies to pipeline inspection models: if historical data reflects decades of neglecting remote and Indigenous communities, an AI tool trained on that data will reproduce the neglect at scale. Catching that before deployment is not overstepping your role. It is the whole point of having an engineer in the room.</p>
+      <p>The alarm fatigue scenario connected the social media harm discussion [8] to something I will deal with in process plants. When a monitoring system sends 50 non-critical alerts per shift, operators stop responding to all of them, including the safety-critical ones. It is the same dynamic as social media platforms optimizing for engagement metrics even when they know the design causes harm. In process safety, alarm fatigue removes a Swiss cheese layer [7]. You are not designing for metrics. You are designing so that when a real alarm fires, someone actually responds.</p>
+      <p>The employment law scenario was the hardest to write because it involves a colleague, not a faceless corporation. But APEGA's obligations are personal [10]. Once you know about a safety concern, you cannot delegate your responsibility to someone else just because they saw the problem first. The Rivtow Marine case [9] established that knowledge of a defect creates liability. Loyalty to a colleague does not override duty to the public. That is a lesson I hope I never have to apply, but I know I need to be ready for it.</p>
+      <p>The tort law content grounded everything. Donoghue v Stevenson and Rivtow Marine [9] established that we owe a duty of care to people we may never meet. APEGA's disciplinary process [10] makes professional accountability non-optional. Getting my P.Eng. is still my goal, but this course has made me think harder about what that title demands. Not just whether the design meets code, but whether it actually serves the people it is supposed to serve.</p>
+    </div>
+
+    <div class="ref-section">
+      <h4>References (IEEE)</h4>
+      <ol>
+        <li>S. Costanza-Chock, <em>Design Justice: Community-Led Practices to Build the Worlds We Need</em>. Cambridge, MA: MIT Press, 2020.</li>
+        <li>J. Carreyrou, <em>Bad Blood: Secrets and Lies in a Silicon Valley Startup</em>. New York, NY: Alfred A. Knopf, 2018.</li>
+        <li>J. Meier, "Beyond Neoliberalism: When an Orthodoxy Hits its Expiration Date," TEDx Talk. [Online]. Available: https://youtube.com/watch?v=2rbp6DMclMQ</li>
+        <li>Strong Towns, "Pedestrian Deaths Are Up 45% in the Last Decade. When Is Enough Enough?" Mar. 11, 2021. [Online]. Available: https://archive.strongtowns.org/journal/2021/3/11/pedestrian-deaths-are-up-45-in-the-last-decade-when-is-enough-enough</li>
+        <li>IIHS, "Fatality Statistics: Yearly Snapshot," 2024. [Online]. Available: https://iihs.org/topics/fatality-statistics/detail/yearly-snapshot</li>
+        <li>P. Evans, "Ikea reminds customers about Malm dresser recall after 8th child dies," CBC News, Nov. 21, 2017. [Online]. Available: https://cbc.ca/news/business/ikea-dresser-recall-1.4411828</li>
+        <li>J. Reason, "Human error: models and management," <em>BMJ</em>, vol. 320, no. 7237, pp. 768&ndash;770, Mar. 2000.</li>
+        <li>I. A. Bashir and N. Bhat, "Effects of Social Media on Mental Health: A Review," <em>Int. J. Indian Psychol.</em>, vol. 7, no. 1, pp. 789&ndash;795, 2019.</li>
+        <li>G. C. Andrews, P. Shaw, and J. McPhee, <em>Canadian Professional Engineering and Geoscience: Practice and Ethics</em>, 6th ed. Toronto, ON: Nelson Education, 2019.</li>
+        <li>APEGA, "Code of Ethics and Rules of Conduct Reference Guide," Mar. 2023. [Online]. Available: https://www.apega.ca/docs/default-source/pdfs/standards-guidelines/code-of-ethics-5-rules-of-conduct-reference-guide-march-2023.pdf?sfvrsn=ef0d8c00_5</li>
+      </ol>
+    </div>
+    <div class="footer">
+      ENGG 687 &bull; Assignment #2 &bull; Ammar AbdulWareth &bull; University of Calgary &bull; Fall 2026
+    </div>
+    <button class="restart-btn" onclick="location.reload()">Play Again</button>
+  </div>
+</div>
+
+<script>
+// Sound
+const AC = window.AudioContext || window.webkitAudioContext;
+let ax = null;
+function tone(f, d, tp, v) {
+  try {
+    if (!ax) ax = new AC();
+    if (ax.state === 'suspended') ax.resume();
+    const o = ax.createOscillator(), g = ax.createGain();
+    o.type = tp || 'sine'; o.frequency.value = f;
+    g.gain.setValueAtTime(v || 0.08, ax.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.001, ax.currentTime + d);
+    o.connect(g); g.connect(ax.destination);
+    o.start(); o.stop(ax.currentTime + d);
+  } catch(e){}
+}
+function sfxGood() { tone(523,.12); setTimeout(()=>tone(659,.12),90); setTimeout(()=>tone(784,.18),180); }
+function sfxOk() { tone(440,.12,'triangle'); setTimeout(()=>tone(494,.15,'triangle'),100); }
+function sfxBad() { tone(330,.15,'sawtooth',.05); setTimeout(()=>tone(277,.2,'sawtooth',.05),120); }
+function sfxStart() { [440,523,587,659].forEach((f,i)=>setTimeout(()=>tone(f,.09),i*65)); }
+function sfxNext() { tone(440,.07); setTimeout(()=>tone(523,.09),65); }
+function sfxFin() { [523,659,784,1047].forEach((f,i)=>setTimeout(()=>tone(f,.2),i*120)); }
+
+const S = [
+  {
+    topic: "Design Justice & Objectivity (Lecture 3.1)",
+    title: "The Consultation That Wasn’t",
+    text: "You just started at an engineering firm in Calgary. Your first project is a wastewater treatment upgrade near a First Nations community in northern Alberta. The timeline is tight. Your PM says the community consultation is “optional” and doing it would push things back three weeks. You remember the Costanza-Chock reading on design justice [1] and how communities most affected by industrial infrastructure get excluded from the process. The facility’s discharge flows into the same watershed this community uses for drinking water.",
+    q: "What do you do?",
+    ch: [
+      { l:"A", t:"Push back on the PM. Insist the consultation happens before the design is finalized, even if it means adjusting the schedule.", pts:3, k:"good" },
+      { l:"B", t:"Keep to the schedule but add a public comment period after the design is done so the community can flag concerns.", pts:2, k:"ok" },
+      { l:"C", t:"Follow the PM’s call. The consultation is optional, the design meets code, and the client cares about the deadline.", pts:1, k:"bad" }
+    ],
+    fb: {
+      good: { h:"Strong ethical choice.", p:"Design justice means involving impacted communities before decisions get locked in, not after [1]. Sasha Kramer’s point about the Reinvent the Toilet challenge applies here: ‘Building the toilet is the easy part. The most challenging step is making it work on the ground’ [1]. A technically compliant design that ignores the community it affects is not serving the public interest. Pushing back is uncomfortable, especially as the new person, but it is what the APEGA code expects when public welfare is at stake [10].", c:"Design Justice framework, environmental racism (Lec 3.1)" },
+      ok: { h:"Partially ethical, but flawed.", p:"A post-design comment period sounds fair, but if the design is already finalized, community feedback cannot actually change anything. This mirrors the pattern from lecture where marginalized communities are technically ‘included’ but have no real influence [1]. The Theranos case showed the same problem: a fluid engineer flagged that elderly patients couldn’t operate the device, but was ignored because the design was locked in [2].", c:"Theranos case study, tokenistic consultation (Lec 3.1)" },
+      bad: { h:"Legally compliant, ethically questionable.", p:"Meeting code is the minimum, not the standard. The design justice lecture asked: whose problems get prioritized? Who is part of the process? Who benefits? Who is harmed? [1] Skipping consultation because it is optional means the people most affected had zero input. That is how environmental racism works in practice. It is engineers following the path of least resistance, and the communities bearing the risk are the ones with the least political power [1].", c:"Environmental racism, design justice questions (Lec 3.1)" }
+    }
+  },
+  {
+    topic: "Neoliberalism & Politics (Lecture 3.2)",
+    title: "The Cost-Cutting Directive",
+    text: "Six months into your job at a gas processing plant in southern Alberta. Management cuts the maintenance budget by 30% to hit quarterly profit targets. Your team’s preventive maintenance schedule for pressure relief valves goes from quarterly to annual inspections. That is a big jump. You think about the neoliberalism lecture and how market-first thinking treats safety as a cost to optimize [3]. Randy Herrmann’s line about engineers being “the foot soldiers of capitalism” hits different now. The pedestrian death stats keep echoing: up 45% over a decade while cars got safer for drivers [4][5].",
+    q: "How do you respond?",
+    ch: [
+      { l:"A", t:"Put your concerns in writing. Email your supervisor listing the specific safety risks. If they dismiss it, escalate through APEGA’s process.", pts:3, k:"good" },
+      { l:"B", t:"Raise the concern verbally. Tell your supervisor you are not comfortable. If they insist, follow the new schedule.", pts:2, k:"ok" },
+      { l:"C", t:"Follow the new schedule. Management has the data and made a business decision. You are six months in.", pts:1, k:"bad" }
+    ],
+    fb: {
+      good: { h:"Professional accountability.", p:"Written documentation matters. If something goes wrong and you never put concerns on paper, there is no record you raised the issue. The tort law lectures established that engineers can be held personally liable for negligence when they fail to act on known risks [9]. The ATC staffing example is relevant: controllers left shifts early to cut overtime, then a crash happened [3]. APEGA’s code is clear: public safety comes first, even when it conflicts with your employer [10].", c:"Neoliberalism, ‘foot soldiers of capitalism’ (Lec 3.2), APEGA Code" },
+      ok: { h:"Verbal concerns vanish.", p:"Without written documentation, there is no record. The pedestrian crossing case shows this. People raised verbal concerns for years. An 8-year-old died in 1982 and nothing changed. It took a 12-year-old survivor publicly fighting for a crossing in 1996 for anything to happen [3]. Verbal pushback without paper is basically silence once time passes.", c:"Pedestrian crossing case study (Lec 3.2)" },
+      bad: { h:"Dangerous deferral.", p:"The SUV safety data applies directly. Vehicles got safer for drivers while pedestrian fatalities went up 45% [4]. The people making business decisions were not the ones getting hit. Same here: managers cutting the budget are in an office, not standing next to the valve. ‘Not your call’ is exactly the mindset the neoliberalism lecture warned about [3].", c:"SUV safety vs pedestrian deaths, neoliberal deregulation (Lec 3.2)" }
+    }
+  },
+  {
+    topic: "Design for Safety & Misuse (Lecture 3.3)",
+    title: "The Operator Workaround",
+    text: "You are doing an operations review at a bitumen extraction facility. Walking the plant floor, you notice operators have zip-tied open an interlock switch on a heat exchanger. They say it trips too often and slows production. The interlock prevents thermal runaway. You think of the IKEA Malm dresser: worked as designed, but eight children died because designers did not account for real-world use [6]. Then the Swiss cheese model: catastrophic failures happen when holes in your defence layers line up [7]. Right now, your operators punched a hole through one layer on purpose.",
+    q: "What do you do?",
+    ch: [
+      { l:"A", t:"Reinstate the interlock immediately. File a management of change request to investigate why it trips so often. Work with operators on a fix that keeps safety intact.", pts:3, k:"good" },
+      { l:"B", t:"Report the bypass to your supervisor and recommend reinstating it. Leave the final call to them.", pts:2, k:"ok" },
+      { l:"C", t:"Note it in your report but do not halt production. They have run this way for months with no incident.", pts:1, k:"bad" }
+    ],
+    fb: {
+      good: { h:"Textbook process safety.", p:"This is design for misuse done right. The lecture explained: ‘design for misuse is less about modifying users’ behavior and more about allowing a tool to continue to be functional, given the likelihood of certain behavior’ [7]. The operators bypassed it because it interfered with their work. That is a design problem, not just a discipline problem. Investigating the root cause is the engineering judgment the Swiss cheese model calls for [7].", c:"Swiss cheese model, design for misuse, IKEA Malm case (Lec 3.3)" },
+      ok: { h:"Reported, but who owns the risk?", p:"Reporting is necessary but not sufficient. The IKEA case dragged on over 20 years and cost eight children their lives before a recall happened [6]. At each step, people passed the decision up instead of acting. APEGA’s code says the engineer who identifies the hazard has a professional obligation to ensure it gets fixed [10].", c:"IKEA dresser recall timeline (Lec 3.3)" },
+      bad: { h:"Survivorship bias.", p:"‘It has not failed yet’ is not a safety argument. The social media discussion made a similar point: harm that accumulates slowly without a dramatic event is still harm [8]. The Swiss cheese model warns that removing one defence layer means you are relying on the rest, and you do not know when those have gaps too [7]. Every catastrophic accident was preceded by a period where nothing went wrong.", c:"Swiss cheese model, slow harm accumulation (Lec 3.3)" }
+    }
+  },
+  {
+    topic: "Tort Law & Negligence (Lectures 1.5/1.6)",
+    title: "The Incident Report",
+    text: "A small leak at a pipeline connection. Nobody hurt, secondary containment caught it. Your supervisor suggests filing it as routine maintenance rather than a reportable incident. Their logic: a formal report triggers a regulatory investigation, delaying the expansion project. You think about Donoghue v Stevenson and the snail in the ginger beer bottle [9]. Rivtow Marine, where knowing about a defect created liability [9]. And APEGA listing negligence as one of six grounds for discipline [10].",
+    q: "How do you handle the report?",
+    ch: [
+      { l:"A", t:"File it accurately per regulations. Document everything, including the conversation with your supervisor.", pts:3, k:"good" },
+      { l:"B", t:"File the report accurately but skip documenting the conversation. You do not want to create conflict.", pts:2, k:"ok" },
+      { l:"C", t:"Follow your supervisor’s suggestion. The leak was minor, contained, nobody hurt.", pts:1, k:"bad" }
+    ],
+    fb: {
+      good: { h:"Full compliance and documentation.", p:"Rivtow Marine showed that knowledge of a defect creates liability [9]. If you know the incident should be reported and downgrade it, you are personally exposed. Documenting the conversation creates a record. The lecture emphasized: ‘Keep good records’ [9]. Under APEGA, negligence and professional misconduct are both grounds for discipline, and knowingly misclassifying an incident qualifies as both [10].", c:"Rivtow Marine, Donoghue v Stevenson, APEGA discipline (Lec 1.5/1.6)" },
+      ok: { h:"Right report, missing protection.", p:"You filed correctly, and that matters most. But without documenting the conversation, there is no record your supervisor pressured you. If this becomes a pattern, your credibility depends on records you did not keep. The tort law lectures stressed that duty of care extends beyond direct contracts [9].", c:"Duty of care, record-keeping (Lec 1.5/1.6)" },
+      bad: { h:"This is how negligence cases begin.", p:"Donoghue v Stevenson established duty of care to people you can reasonably foresee being affected, even without a contract [9]. Downgrading a reportable incident because it was ‘minor’ is exactly the decision that gets scrutinized if a larger failure occurs later. Misclassifying an incident to avoid scrutiny is professional misconduct under APEGA [10]. Your supervisor asked, but you are the engineer of record.", c:"Donoghue v Stevenson, negligence (Lec 1.5/1.6)" }
+    }
+  },
+  {
+    topic: "Objectivity & Bias in Engineering (Lecture 3.1)",
+    title: "The Algorithm You Did Not Question",
+    text: "Your company is implementing a predictive maintenance system for pipeline monitoring across several facilities. A vendor pitches an AI tool that flags high-risk pipeline segments for priority inspection. The tool was trained on historical inspection data. You notice the training data comes almost entirely from urban pipeline corridors. Rural and remote segments, including several that run through Indigenous communities, have far fewer historical inspections and therefore appear as ‘low risk’ in the model. The lecture on objectivity discussed how facial recognition systems had higher error rates for darker-skinned individuals because training data was biased [1]. The same principle applies here: the algorithm is not objective. It is reflecting the priorities of whoever collected the data.",
+    q: "What do you do about the tool?",
+    ch: [
+      { l:"A", t:"Flag the data bias to your team and the vendor. Recommend that rural and remote segments be inspected at the same baseline frequency regardless of what the model says, until the training data is representative.", pts:3, k:"good" },
+      { l:"B", t:"Raise the concern internally but agree to pilot the tool as-is. You can fix the data gap over time as more inspections happen in rural areas.", pts:2, k:"ok" },
+      { l:"C", t:"Trust the vendor’s expertise. They built the model, and your job is pipeline engineering, not data science. Use the tool as recommended.", pts:1, k:"bad" }
+    ],
+    fb: {
+      good: { h:"You caught the bias before it caused harm.", p:"This is exactly the kind of situation the objectivity lecture was about. Engineering tools are not neutral. They reflect the assumptions, priorities, and blind spots of whoever built them [1]. A predictive model trained on biased data will reproduce that bias at scale. The facial recognition research showed that algorithms performed worse on faces that were underrepresented in training data [1]. Same principle: if rural and Indigenous community pipelines were inspected less often historically, the model will flag them as low risk even if the actual risk is the same or higher. Catching this before deployment is doing your job as an engineer, not overstepping it.", c:"Objectivity, bias in data, facial recognition case study (Lec 3.1)" },
+      ok: { h:"Good instinct, risky timeline.", p:"You identified the problem, which matters. But piloting a biased tool while you ‘fix the data over time’ means that for months or years, rural and remote pipeline segments will receive fewer inspections than they should. If a failure occurs during that window, you knew the tool was underestimating risk in those areas. The Theranos case showed what happens when known problems are deferred because the product is already in use [2]. Bias does not fix itself through more deployment.", c:"Bias in data, Theranos (Lec 3.1)" },
+      bad: { h:"Deferring to credentials is not the same as engineering judgment.", p:"The lecture made it clear that engineering is not neutral and neither are the tools engineers use [1]. ‘The vendor built it’ does not mean it is correct. Data bias is an engineering problem, not just a data science problem, because engineers are the ones deploying the tool and making inspection decisions based on its output. If the model underestimates risk for certain communities because of biased training data, the engineer who approved its use is responsible for the outcomes [10].", c:"Engineering not neutral, professional responsibility (Lec 3.1)" }
+    }
+  },
+  {
+    topic: "Design Ethics & Harm (Lecture 3.3)",
+    title: "The Feature You Know Causes Harm",
+    text: "You have moved into a product engineering role at a tech company in Calgary. Your team is designing a notification system for an industrial monitoring app used by plant operators. During testing, you notice that the system sends an excessive number of non-critical alerts, sometimes 40 or 50 per shift. Operators are starting to ignore all notifications, including the safety-critical ones. Your product manager says engagement metrics look great because operators are ‘interacting with the app constantly.’ The lecture on social media and mental health discussed how platforms design features they know cause harm because engagement metrics look good [8]. The same dynamic is playing out here: your notification system is training operators to ignore safety alerts.",
+    q: "What do you raise?",
+    ch: [
+      { l:"A", t:"Present the alarm fatigue data to your PM and recommend reducing non-critical notifications. Propose a tiered system that distinguishes routine alerts from safety-critical ones so operators actually respond to the ones that matter.", pts:3, k:"good" },
+      { l:"B", t:"Suggest adding a visual distinction between critical and non-critical alerts, but do not push to reduce the total number. The PM cares about engagement and you do not want to fight that battle.", pts:2, k:"ok" },
+      { l:"C", t:"Keep the system as is. Operators are adults and can learn to prioritize. The engagement numbers are strong and the PM is happy.", pts:1, k:"bad" }
+    ],
+    fb: {
+      good: { h:"You are designing for safety, not metrics.", p:"Alarm fatigue is a well-documented problem in process safety and healthcare. When people receive too many alerts, they stop responding to all of them, including the critical ones. This is the same pattern the social media lecture discussed: platforms that optimize for engagement metrics even when they know the design causes harm [8]. The seven principles of universal design from lecture include ‘tolerance for error,’ which means designing systems that minimize the consequences of unintended actions [7]. A notification system that trains operators to ignore safety alerts is the opposite of that. Redesigning for actual safety outcomes instead of vanity metrics is the right call.", c:"Alarm fatigue, social media design, universal design principles (Lec 3.3)" },
+      ok: { h:"Partial fix, root cause untouched.", p:"Adding visual distinction helps, but if operators are still getting 50 notifications per shift, the cognitive overload problem remains. The IKEA Malm case is instructive: adding a wall-anchoring kit was a partial solution, but children kept dying because the fundamental design problem was not addressed [6]. Similarly, making critical alerts a different color does not solve alarm fatigue if the total volume is still overwhelming. You identified the right problem but proposed a fix that avoids confronting the PM’s attachment to engagement metrics.", c:"IKEA Malm partial fix, alarm fatigue (Lec 3.3)" },
+      bad: { h:"You are optimizing for the wrong outcome.", p:"The social media lecture was specifically about this: designing systems that generate engagement at the expense of user wellbeing [8]. ‘Operators can learn to prioritize’ is the same argument social media companies use about users and screen time. The Swiss cheese model applies here too. Alarm fatigue removes a layer of defence. When operators stop responding to alerts, you have lost one of your safety barriers [7]. If a critical event occurs and the operator ignores the notification because they have been conditioned to dismiss all of them, the design of your system is a contributing factor.", c:"Social media harm, Swiss cheese model, alarm fatigue (Lec 3.3)" }
+    }
+  },
+  {
+    topic: "Employment Law & Professional Duty (Lecture 1.6)",
+    title: "The Colleague Who Asked You to Stay Quiet",
+    text: "A colleague you respect tells you they discovered that the corrosion rate data in your facility’s most recent integrity assessment was based on outdated measurements from three years ago. The current data, which they have seen, shows significantly higher corrosion in two pipeline segments. They flagged it to their supervisor, who told them to leave it alone because updating the assessment would require an expensive shutdown and re-inspection. Your colleague is worried about their job and asks you not to bring it up again. You remember from the employment law lecture that engineers have both contractual obligations to their employer and statutory obligations under professional engineering legislation [9]. APEGA’s code is clear that public safety takes precedence over employer loyalty [10]. You also know that APEGA lists six causes for disciplinary action, and failing to report a safety concern you are aware of could fall under negligence or professional misconduct [10].",
+    q: "What do you do?",
+    ch: [
+      { l:"A", t:"Tell your colleague you understand their position, but you cannot stay quiet about a known safety issue. Report the outdated corrosion data through proper channels yourself, in writing.", pts:3, k:"good" },
+      { l:"B", t:"Encourage your colleague to escalate the issue themselves. Offer to support them, but do not report it independently. It is their finding and their call.", pts:2, k:"ok" },
+      { l:"C", t:"Respect your colleague’s request. They already raised it with their supervisor, and it is not your pipeline segment. You do not want to damage the relationship or create problems for them.", pts:1, k:"bad" }
+    ],
+    fb: {
+      good: { h:"Difficult but necessary.", p:"This is one of the hardest situations in professional practice: doing the right thing when it puts you at odds with a colleague you care about. But the employment law lecture was clear. Your professional obligations under APEGA are personal. They do not transfer to someone else because they saw the problem first [10]. Once you know about a safety concern, you have an independent obligation to act on it. The Rivtow Marine case established that knowledge of a defect creates liability [9]. If those corroded pipeline segments fail and you knew the integrity data was outdated, your silence is a professional and potentially legal problem. Reporting in writing creates a record and protects both you and, ultimately, your colleague.", c:"Employment law, professional vs contractual obligations, Rivtow Marine (Lec 1.6)" },
+      ok: { h:"Supportive, but insufficient.", p:"Encouraging your colleague is decent, but they already tried. Their supervisor shut them down. If you wait for them to try again, the outdated corrosion data stays in the integrity assessment, and the risk stays unaddressed. The pedestrian crossing case from the neoliberalism lecture showed what happens when concerns get raised verbally and then dropped: nothing changes until someone gets hurt [3]. Your professional obligation is personal. APEGA does not recognize ‘someone else was supposed to handle it’ as a defence [10].", c:"Professional obligation, pedestrian crossing case (Lec 1.6, 3.2)" },
+      bad: { h:"Loyalty to a person does not override duty to the public.", p:"You now know that two pipeline segments have higher corrosion rates than the integrity assessment reflects. That is a known safety discrepancy. The employment law lecture explained that while engineers have contractual obligations to their employer, their statutory obligations under APEGA take precedence when public safety is at stake [9]. APEGA lists negligence and professional misconduct as grounds for discipline [10]. Staying quiet because a colleague asked you to, when you know the data is wrong, puts you in personal professional jeopardy. And more importantly, it leaves the public at risk.", c:"Employment law, duty of care, APEGA discipline (Lec 1.6)" }
+    }
+  }
+];
+
+let cur = 0, total = 0, scores = [];
+
+function go() {
+  sfxStart();
+  document.getElementById('titleScreen').style.display = 'none';
+  show(0);
+}
+
+function show(i) {
+  cur = i;
+  if (i > 0) sfxNext();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+  const s = S[i], a = document.getElementById('area');
+  const pct = (i / S.length) * 100;
+  const ch = s.ch.map((c, j) =>
+    `<button class="choice-btn" id="c${i}-${j}" onclick="pick(${i},${j})">
+      <span class="letter">${c.l}.</span>${c.t}
+    </button>`
+  ).join('');
+  a.innerHTML = `
+    <div class="scenario active">
+      <div class="progress">
+        <div class="progress-bar"><div class="progress-fill" style="width:${pct}%"></div></div>
+        ${i+1} of ${S.length}
+      </div>
+      <div class="sc-label">${s.topic}</div>
+      <h2>${s.title}</h2>
+      <div class="narrative"><p>${s.text}</p></div>
+      <div class="question">${s.q}</div>
+      <div class="choices">${ch}</div>
+      <div class="outcome" id="o${i}"></div>
+    </div>`;
+}
+
+function pick(si, ci) {
+  const s = S[si], c = s.ch[ci];
+  total += c.pts;
+  scores.push({ pts: c.pts, k: c.k });
+  if (c.k === 'good') sfxGood(); else if (c.k === 'ok') sfxOk(); else sfxBad();
+  s.ch.forEach((_, j) => {
+    const b = document.getElementById(`c${si}-${j}`);
+    b.style.pointerEvents = 'none';
+    if (j !== ci) b.style.opacity = '0.3';
+  });
+  document.getElementById(`c${si}-${ci}`).classList.add(`picked-${c.k}`);
+  const fb = s.fb[c.k], od = document.getElementById(`o${si}`);
+  od.classList.add('show');
+  od.innerHTML = `
+    <div class="feedback-box fb-${c.k}">
+      <h4>${fb.h}</h4>
+      <p>${fb.p}</p>
+      <div class="conn">${fb.c}</div>
+    </div>
+    <button class="next-btn" onclick="${si < S.length-1 ? `show(${si+1})` : 'fin()'}">
+      ${si < S.length-1 ? 'Next →' : 'See Result →'}
+    </button>`;
+  setTimeout(() => od.scrollIntoView({ behavior: 'smooth', block: 'center' }), 80);
+}
+
+function fin() {
+  sfxFin();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+  document.getElementById('area').innerHTML = '';
+  const sc = document.getElementById('scoreScreen');
+  sc.classList.add('show');
+  const pct = Math.round((total / (S.length * 3)) * 100);
+  const n = document.getElementById('sNum');
+  const t = document.getElementById('sTitle');
+  const d = document.getElementById('sDesc');
+  n.textContent = pct + '%';
+  if (pct >= 80) {
+    n.className = 'score-num score-high'; t.textContent = 'Principled Engineer';
+    d.textContent = 'You consistently chose public safety and professional accountability over convenience.';
+  } else if (pct >= 55) {
+    n.className = 'score-num score-mid'; t.textContent = 'Developing Professional';
+    d.textContent = 'You showed awareness of ethical responsibilities but sometimes compromised under pressure.';
+  } else {
+    n.className = 'score-num score-low'; t.textContent = 'At Risk';
+    d.textContent = 'Several choices prioritized compliance or comfort over ethical responsibility.';
+  }
+  const cols = { good:'#5a8a5a', ok:'#b8963a', bad:'#a05050' };
+  document.getElementById('sGrid').innerHTML = scores.map((s,i) =>
+    `<div class="sg-box"><span class="pts" style="color:${cols[s.k]}">${s.pts}/3</span><span class="lab">Scenario ${i+1}</span></div>`
+  ).join('');
+}
+</script>
+</body>
+</html>
