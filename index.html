@@ -340,13 +340,13 @@ const S = [
   },
   {
     topic: "Neoliberalism & Politics (Lecture 3.2)",
-    title: "The Cost-Cutting Directive",
-    text: "Six months into your job at a gas processing plant in southern Alberta. Management cuts the maintenance budget by 30% to hit quarterly profit targets. Your team’s preventive maintenance schedule for pressure relief valves goes from quarterly to annual inspections. That is a big jump. You think about the neoliberalism lecture and how market-first thinking treats safety as a cost to optimize [3]. Randy Herrmann’s line about engineers being “the foot soldiers of capitalism” hits different now. The pedestrian death stats keep echoing: up 45% over a decade while cars got safer for drivers [4][5].",
-    q: "How do you respond?",
+    title: “The Cost-Cutting Directive”,
+    text: “Six months into your job at a gas processing plant in southern Alberta. Management cuts the maintenance budget by 30% to hit quarterly profit targets. Your team’s preventive maintenance schedule for pressure relief valves goes from quarterly to annual inspections. That is a big jump. You think about the neoliberalism lecture and how market-first thinking treats safety as a cost to optimize [3]. Randy Herrmann’s line about engineers being “the foot soldiers of capitalism” hits different now. The pedestrian death stats keep echoing: up 45% over a decade while cars got safer for drivers [4][5].”,
+    q: “How do you respond?”,
     ch: [
-      { l:"A", t:"Put your concerns in writing. Email your supervisor listing the specific safety risks. If they dismiss it, escalate through APEGA’s process.", pts:3, k:"good" },
-      { l:"B", t:"Raise the concern verbally. Tell your supervisor you are not comfortable. If they insist, follow the new schedule.", pts:2, k:"ok" },
-      { l:"C", t:"Follow the new schedule. Management has the data and made a business decision. You are six months in.", pts:1, k:"bad" }
+      { l:”A”, t:”Follow the new schedule. Management has the data and made a business decision. You are six months in.”, pts:1, k:”bad” },
+      { l:”B”, t:”Put your concerns in writing. Email your supervisor listing the specific safety risks. If they dismiss it, escalate through APEGA’s process.”, pts:3, k:”good” },
+      { l:”C”, t:”Raise the concern verbally. Tell your supervisor you are not comfortable. If they insist, follow the new schedule.”, pts:2, k:”ok” }
     ],
     fb: {
       good: { h:"Professional accountability.", p:"Written documentation matters. If something goes wrong and you never put concerns on paper, there is no record you raised the issue. The tort law lectures established that engineers can be held personally liable for negligence when they fail to act on known risks [9]. The ATC staffing example is relevant: controllers left shifts early to cut overtime, then a crash happened [3]. APEGA’s code is clear: public safety comes first, even when it conflicts with your employer [10].", c:"Neoliberalism, ‘foot soldiers of capitalism’ (Lec 3.2), APEGA Code" },
@@ -360,9 +360,9 @@ const S = [
     text: "You are doing an operations review at a bitumen extraction facility. Walking the plant floor, you notice operators have zip-tied open an interlock switch on a heat exchanger. They say it trips too often and slows production. The interlock prevents thermal runaway. You think of the IKEA Malm dresser: worked as designed, but eight children died because designers did not account for real-world use [6]. Then the Swiss cheese model: catastrophic failures happen when holes in your defence layers line up [7]. Right now, your operators punched a hole through one layer on purpose.",
     q: "What do you do?",
     ch: [
-      { l:"A", t:"Reinstate the interlock immediately. File a management of change request to investigate why it trips so often. Work with operators on a fix that keeps safety intact.", pts:3, k:"good" },
+      { l:"A", t:"Note it in your report but do not halt production. They have run this way for months with no incident.", pts:1, k:"bad" },
       { l:"B", t:"Report the bypass to your supervisor and recommend reinstating it. Leave the final call to them.", pts:2, k:"ok" },
-      { l:"C", t:"Note it in your report but do not halt production. They have run this way for months with no incident.", pts:1, k:"bad" }
+      { l:"C", t:"Reinstate the interlock immediately. File a management of change request to investigate why it trips so often. Work with operators on a fix that keeps safety intact.", pts:3, k:"good" }
     ],
     fb: {
       good: { h:"Textbook process safety.", p:"This is design for misuse done right. The lecture explained: ‘design for misuse is less about modifying users’ behavior and more about allowing a tool to continue to be functional, given the likelihood of certain behavior’ [7]. The operators bypassed it because it interfered with their work. That is a design problem, not just a discipline problem. Investigating the root cause is the engineering judgment the Swiss cheese model calls for [7].", c:"Swiss cheese model, design for misuse, IKEA Malm case (Lec 3.3)" },
@@ -392,9 +392,9 @@ const S = [
     text: "Your company is implementing a predictive maintenance system for pipeline monitoring across several facilities. A vendor pitches an AI tool that flags high-risk pipeline segments for priority inspection. The tool was trained on historical inspection data. You notice the training data comes almost entirely from urban pipeline corridors. Rural and remote segments, including several that run through Indigenous communities, have far fewer historical inspections and therefore appear as ‘low risk’ in the model. The lecture on objectivity discussed how facial recognition systems had higher error rates for darker-skinned individuals because training data was biased [1]. The same principle applies here: the algorithm is not objective. It is reflecting the priorities of whoever collected the data.",
     q: "What do you do about the tool?",
     ch: [
-      { l:"A", t:"Flag the data bias to your team and the vendor. Recommend that rural and remote segments be inspected at the same baseline frequency regardless of what the model says, until the training data is representative.", pts:3, k:"good" },
+      { l:"A", t:"Trust the vendor’s expertise. They built the model, and your job is pipeline engineering, not data science. Use the tool as recommended.", pts:1, k:"bad" },
       { l:"B", t:"Raise the concern internally but agree to pilot the tool as-is. You can fix the data gap over time as more inspections happen in rural areas.", pts:2, k:"ok" },
-      { l:"C", t:"Trust the vendor’s expertise. They built the model, and your job is pipeline engineering, not data science. Use the tool as recommended.", pts:1, k:"bad" }
+      { l:"C", t:"Flag the data bias to your team and the vendor. Recommend that rural and remote segments be inspected at the same baseline frequency regardless of what the model says, until the training data is representative.", pts:3, k:"good" }
     ],
     fb: {
       good: { h:"You caught the bias before it caused harm.", p:"This is exactly the kind of situation the objectivity lecture was about. Engineering tools are not neutral. They reflect the assumptions, priorities, and blind spots of whoever built them [1]. A predictive model trained on biased data will reproduce that bias at scale. The facial recognition research showed that algorithms performed worse on faces that were underrepresented in training data [1]. Same principle: if rural and Indigenous community pipelines were inspected less often historically, the model will flag them as low risk even if the actual risk is the same or higher. Catching this before deployment is doing your job as an engineer, not overstepping it.", c:"Objectivity, bias in data, facial recognition case study (Lec 3.1)" },
@@ -408,9 +408,9 @@ const S = [
     text: "You have moved into a product engineering role at a tech company in Calgary. Your team is designing a notification system for an industrial monitoring app used by plant operators. During testing, you notice that the system sends an excessive number of non-critical alerts, sometimes 40 or 50 per shift. Operators are starting to ignore all notifications, including the safety-critical ones. Your product manager says engagement metrics look great because operators are ‘interacting with the app constantly.’ The lecture on social media and mental health discussed how platforms design features they know cause harm because engagement metrics look good [8]. The same dynamic is playing out here: your notification system is training operators to ignore safety alerts.",
     q: "What do you raise?",
     ch: [
-      { l:"A", t:"Present the alarm fatigue data to your PM and recommend reducing non-critical notifications. Propose a tiered system that distinguishes routine alerts from safety-critical ones so operators actually respond to the ones that matter.", pts:3, k:"good" },
-      { l:"B", t:"Suggest adding a visual distinction between critical and non-critical alerts, but do not push to reduce the total number. The PM cares about engagement and you do not want to fight that battle.", pts:2, k:"ok" },
-      { l:"C", t:"Keep the system as is. Operators are adults and can learn to prioritize. The engagement numbers are strong and the PM is happy.", pts:1, k:"bad" }
+      { l:"A", t:"Keep the system as is. Operators are adults and can learn to prioritize. The engagement numbers are strong and the PM is happy.", pts:1, k:"bad" },
+      { l:"B", t:"Present the alarm fatigue data to your PM and recommend reducing non-critical notifications. Propose a tiered system that distinguishes routine alerts from safety-critical ones so operators actually respond to the ones that matter.", pts:3, k:"good" },
+      { l:"C", t:"Suggest adding a visual distinction between critical and non-critical alerts, but do not push to reduce the total number. The PM cares about engagement and you do not want to fight that battle.", pts:2, k:"ok" }
     ],
     fb: {
       good: { h:"You are designing for safety, not metrics.", p:"Alarm fatigue is a well-documented problem in process safety and healthcare. When people receive too many alerts, they stop responding to all of them, including the critical ones. This is the same pattern the social media lecture discussed: platforms that optimize for engagement metrics even when they know the design causes harm [8]. The seven principles of universal design from lecture include ‘tolerance for error,’ which means designing systems that minimize the consequences of unintended actions [7]. A notification system that trains operators to ignore safety alerts is the opposite of that. Redesigning for actual safety outcomes instead of vanity metrics is the right call.", c:"Alarm fatigue, social media design, universal design principles (Lec 3.3)" },
