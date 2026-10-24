@@ -200,6 +200,61 @@ body {
 }
 .restart-btn:hover { border-color: #999; color: #555; }
 
+/* CAREER PANEL */
+.career-panel {
+  display: none; background: #fff; border: 1px solid #d5cec5;
+  padding: 16px 20px; margin-bottom: 24px;
+  font-family: Helvetica, Arial, sans-serif;
+  animation: fadeIn 0.3s;
+}
+.career-panel.show { display: block; }
+.career-header {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-bottom: 12px;
+}
+.career-title { font-size: 11px; color: #999; text-transform: uppercase; letter-spacing: 1.5px; }
+.career-year { font-size: 12px; color: #666; font-weight: 600; }
+.career-role { font-size: 16px; font-weight: 700; color: #1a1a1a; margin-bottom: 10px; }
+.rep-row { display: flex; align-items: center; gap: 10px; margin-bottom: 6px; }
+.rep-label { font-size: 11px; color: #999; text-transform: uppercase; letter-spacing: 1px; min-width: 72px; }
+.rep-track { flex: 1; height: 6px; background: #eee8e0; border-radius: 3px; overflow: hidden; }
+.rep-fill { height: 100%; border-radius: 3px; transition: width 0.6s ease, background 0.4s; }
+.rep-val { font-size: 12px; font-weight: 700; min-width: 28px; text-align: right; }
+.career-timeline {
+  display: flex; gap: 0; margin-top: 10px; padding-top: 10px;
+  border-top: 1px solid #eee8e0;
+}
+.ct-dot {
+  flex: 1; text-align: center; position: relative; font-size: 10px; color: #ccc;
+}
+.ct-dot::before {
+  content: ''; display: block; width: 10px; height: 10px;
+  border-radius: 50%; background: #ddd; margin: 0 auto 4px;
+  transition: background 0.3s;
+}
+.ct-dot.done::before { background: #5a8a5a; }
+.ct-dot.done { color: #5a8a5a; }
+.ct-dot.current::before { background: #2b2b2b; box-shadow: 0 0 0 3px #d5cec5; }
+.ct-dot.current { color: #2b2b2b; font-weight: 700; }
+.ct-dot.done-ok::before { background: #b8963a; }
+.ct-dot.done-ok { color: #b8963a; }
+.ct-dot.done-bad::before { background: #a05050; }
+.ct-dot.done-bad { color: #a05050; }
+.consequence-note {
+  font-size: 12px; color: #8a7a6a; font-style: italic;
+  margin-top: 10px; padding: 8px 12px; background: #f5f0eb;
+  border-left: 2px solid #c4b8a8; font-family: Georgia, serif;
+}
+
+/* CAREER OUTCOME */
+.career-outcome {
+  background: #fff; border: 1px solid #d5cec5; padding: 20px;
+  margin-bottom: 24px; text-align: center;
+}
+.career-outcome .final-title { font-size: 11px; color: #999; text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 8px; font-family: Helvetica, Arial, sans-serif; }
+.career-outcome .final-role { font-size: 22px; font-weight: 700; color: #1a1a1a; margin-bottom: 4px; }
+.career-outcome .final-desc { font-size: 13px; color: #666; line-height: 1.6; }
+
 @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
 @media (max-width: 500px) {
@@ -249,12 +304,13 @@ body {
     </div>
 
     <div class="how-play">
-      <strong>How to play:</strong> Read each scenario. Pick the response that feels right. The game explains the ethical implications and scores you at the end. No trick questions, but some answers are stronger than others.
+      <strong>How to play:</strong> You are starting your engineering career in Alberta. Each scenario is a year in your professional life. Your choices shape your reputation and determine where your career ends up. Pick the response that feels right. The game tracks your professional reputation and explains the ethical implications. No trick questions, but some answers are stronger than others.
     </div>
 
     <button class="start-btn" onclick="go()">Start</button>
   </div>
 
+  <div class="career-panel" id="careerPanel"></div>
   <div id="area"></div>
 
   <div class="score-screen" id="scoreScreen">
@@ -436,7 +492,67 @@ const S = [
   }
 ];
 
-let cur = 0, total = 0, scores = [];
+// Career stages
+const CAREER = [
+  { year: "Year 1", role: "Engineer-in-Training", short: "EIT" },
+  { year: "Year 1", role: "Engineer-in-Training", short: "EIT" },
+  { year: "Year 2", role: "Operations Engineer", short: "Ops" },
+  { year: "Year 3", role: "Operations Engineer", short: "Ops" },
+  { year: "Year 4", role: "Project Engineer", short: "Proj" },
+  { year: "Year 5", role: "Product Engineer", short: "Prod" },
+  { year: "Year 6", role: "Senior Engineer", short: "Sr" }
+];
+
+// Consequences that reference prior choices
+const CONSEQUENCES = {
+  1: { bad: "After you accepted the budget cuts without pushback last time, management assumes engineers will go along with cost-driven decisions.", ok: "Word got around that you raised a concern verbally but did not follow through. Your supervisor remembers." },
+  2: { bad: "The operators heard you noted their workaround but did nothing about it. They do not trust you to act on safety issues.", ok: "Your supervisor handled the interlock, but the operators see you as someone who passes the buck." },
+  4: { bad: "The biased AI tool you approved without question flagged two Indigenous community segments as low priority. One had a near-miss last quarter.", ok: "The pilot you agreed to ran for eight months. Three rural segments were under-inspected during that window." },
+  6: { bad: "Your colleague who asked you to stay quiet heard you chose silence before when it was easier. They expected nothing different this time." }
+};
+
+let cur = 0, total = 0, scores = [], rep = 50;
+
+function repColor(r) {
+  if (r >= 70) return '#5a8a5a';
+  if (r >= 40) return '#b8963a';
+  return '#a05050';
+}
+
+function renderCareer(i) {
+  const c = CAREER[i], cp = document.getElementById('careerPanel');
+  cp.classList.add('show');
+  const dots = CAREER.map((stage, j) => {
+    let cls = 'ct-dot';
+    if (j < i) {
+      const k = scores[j] ? scores[j].k : '';
+      cls += k === 'good' ? ' done' : k === 'ok' ? ' done-ok' : k === 'bad' ? ' done-bad' : '';
+    } else if (j === i) cls += ' current';
+    return `<div class="${cls}">${stage.short}</div>`;
+  }).join('');
+  const rc = repColor(rep);
+  cp.innerHTML = `
+    <div class="career-header">
+      <span class="career-title">Your Career</span>
+      <span class="career-year">${c.year}</span>
+    </div>
+    <div class="career-role">${c.role}</div>
+    <div class="rep-row">
+      <span class="rep-label">Reputation</span>
+      <div class="rep-track"><div class="rep-fill" style="width:${rep}%;background:${rc}"></div></div>
+      <span class="rep-val" style="color:${rc}">${rep}</span>
+    </div>
+    <div class="career-timeline">${dots}</div>`;
+}
+
+function getConsequence(i) {
+  if (!CONSEQUENCES[i]) return '';
+  const prev = scores[i-1];
+  if (!prev) return '';
+  const note = CONSEQUENCES[i][prev.k];
+  if (!note) return '';
+  return `<div class="consequence-note">${note}</div>`;
+}
 
 function go() {
   sfxStart();
@@ -448,8 +564,10 @@ function show(i) {
   cur = i;
   if (i > 0) sfxNext();
   window.scrollTo({ top: 0, behavior: 'smooth' });
+  renderCareer(i);
   const s = S[i], a = document.getElementById('area');
   const pct = (i / S.length) * 100;
+  const conseq = getConsequence(i);
   const ch = s.ch.map((c, j) =>
     `<button class="choice-btn" id="c${i}-${j}" onclick="pick(${i},${j})">
       <span class="letter">${c.l}.</span>${c.t}
@@ -463,6 +581,7 @@ function show(i) {
       </div>
       <div class="sc-label">${s.topic}</div>
       <h2>${s.title}</h2>
+      ${conseq}
       <div class="narrative"><p>${s.text}</p></div>
       <div class="question">${s.q}</div>
       <div class="choices">${ch}</div>
@@ -474,7 +593,11 @@ function pick(si, ci) {
   const s = S[si], c = s.ch[ci];
   total += c.pts;
   scores.push({ pts: c.pts, k: c.k });
-  if (c.k === 'good') sfxGood(); else if (c.k === 'ok') sfxOk(); else sfxBad();
+  // Update reputation
+  if (c.k === 'good') { rep = Math.min(100, rep + 10); sfxGood(); }
+  else if (c.k === 'ok') { rep = Math.min(100, rep + 2); sfxOk(); }
+  else { rep = Math.max(0, rep - 12); sfxBad(); }
+  renderCareer(si);
   s.ch.forEach((_, j) => {
     const b = document.getElementById(`c${si}-${j}`);
     b.style.pointerEvents = 'none';
@@ -483,14 +606,17 @@ function pick(si, ci) {
   document.getElementById(`c${si}-${ci}`).classList.add(`picked-${c.k}`);
   const fb = s.fb[c.k], od = document.getElementById(`o${si}`);
   od.classList.add('show');
+  // Reputation change indicator
+  const repDelta = c.k === 'good' ? '+10' : c.k === 'ok' ? '+2' : '-12';
+  const repDeltaCol = c.k === 'good' ? '#5a8a5a' : c.k === 'ok' ? '#b8963a' : '#a05050';
   od.innerHTML = `
     <div class="feedback-box fb-${c.k}">
-      <h4>${fb.h}</h4>
+      <h4>${fb.h} <span style="float:right;font-size:12px;color:${repDeltaCol}">Reputation ${repDelta}</span></h4>
       <p>${fb.p}</p>
       <div class="conn">${fb.c}</div>
     </div>
     <button class="next-btn" onclick="${si < S.length-1 ? `show(${si+1})` : 'fin()'}">
-      ${si < S.length-1 ? 'Next →' : 'See Result →'}
+      ${si < S.length-1 ? 'Next: ' + CAREER[si+1].role + ' (' + CAREER[si+1].year + ') →' : 'See Your Career Outcome →'}
     </button>`;
   setTimeout(() => od.scrollIntoView({ behavior: 'smooth', block: 'center' }), 80);
 }
@@ -499,26 +625,50 @@ function fin() {
   sfxFin();
   window.scrollTo({ top: 0, behavior: 'smooth' });
   document.getElementById('area').innerHTML = '';
+  document.getElementById('careerPanel').classList.remove('show');
   const sc = document.getElementById('scoreScreen');
   sc.classList.add('show');
   const pct = Math.round((total / (S.length * 3)) * 100);
+  // Career outcome based on reputation
+  let finalRole, finalDesc, cls;
+  if (rep >= 80) {
+    finalRole = 'Principal Engineer & APEGA Ethics Committee Member';
+    finalDesc = 'Your consistent integrity earned you a leadership position. Colleagues trust your judgment. You mentor the next generation of engineers the way you wish someone had mentored you.';
+    cls = 'score-high';
+  } else if (rep >= 60) {
+    finalRole = 'Senior Process Engineer, P.Eng.';
+    finalDesc = 'You built a solid career and earned your P.Eng. Some decisions haunt you, but you learned from them. Your team respects you, even if your reputation took a few hits along the way.';
+    cls = 'score-mid';
+  } else if (rep >= 35) {
+    finalRole = 'Mid-Level Engineer (Career Stalled)';
+    finalDesc = 'You are competent, but your track record of compromises followed you. Promotions went to people who spoke up when it mattered. You know what you should have done differently.';
+    cls = 'score-mid';
+  } else {
+    finalRole = 'Former Engineer (License Under Review)';
+    finalDesc = 'A pattern of deferred responsibility caught up with you. APEGA opened a file. You are not sure if you will keep your license. The career you dreamed of looks very different now.';
+    cls = 'score-low';
+  }
+  // Career outcome card
+  const outcomeHTML = `
+    <div class="career-outcome">
+      <div class="final-title">10 Years Later</div>
+      <div class="final-role">${finalRole}</div>
+      <div class="final-desc">${finalDesc}</div>
+      <div style="margin-top:12px;font-family:Helvetica,Arial,sans-serif;font-size:13px;color:${repColor(rep)}">Final Reputation: ${rep}/100</div>
+    </div>`;
+  // Insert before the score heading
   const n = document.getElementById('sNum');
   const t = document.getElementById('sTitle');
   const d = document.getElementById('sDesc');
   n.textContent = pct + '%';
-  if (pct >= 80) {
-    n.className = 'score-num score-high'; t.textContent = 'Principled Engineer';
-    d.textContent = 'You consistently chose public safety and professional accountability over convenience.';
-  } else if (pct >= 55) {
-    n.className = 'score-num score-mid'; t.textContent = 'Developing Professional';
-    d.textContent = 'You showed awareness of ethical responsibilities but sometimes compromised under pressure.';
-  } else {
-    n.className = 'score-num score-low'; t.textContent = 'At Risk';
-    d.textContent = 'Several choices prioritized compliance or comfort over ethical responsibility.';
-  }
+  n.className = 'score-num ' + cls;
+  t.textContent = rep >= 60 ? 'Principled Engineer' : rep >= 35 ? 'Developing Professional' : 'At Risk';
+  d.textContent = '';
+  // Inject career outcome before score grid
+  document.getElementById('sGrid').insertAdjacentHTML('beforebegin', outcomeHTML);
   const cols = { good:'#5a8a5a', ok:'#b8963a', bad:'#a05050' };
   document.getElementById('sGrid').innerHTML = scores.map((s,i) =>
-    `<div class="sg-box"><span class="pts" style="color:${cols[s.k]}">${s.pts}/3</span><span class="lab">Scenario ${i+1}</span></div>`
+    `<div class="sg-box"><span class="pts" style="color:${cols[s.k]}">${s.pts}/3</span><span class="lab">${CAREER[i].short}</span></div>`
   ).join('');
 }
 </script>
